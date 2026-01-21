@@ -17,8 +17,16 @@ struct Vector3 {
         return Vector3(this->x - vec.x, this->y - vec.y, this->z - vec.z);
     }
 
+
     float dot_product(const Vector3& other_vec) const {
         return (this->x * other_vec.x) + (this->y * other_vec.y) + (this->z * other_vec.z);
+    }
+    Vector3 cross_product(const Vector3& vec) {
+        return Vector3(
+            this->y * vec.z - this->z * vec.y,
+            this->z * vec.x - this->x * vec.z,
+            this->x * vec.y - this->y * vec.x
+        );
     }
     void normalize() {
         float length = get_length();
@@ -56,6 +64,10 @@ int main()
 
     std::cout << "dot product of vec:" << std::endl;
     std::cout << vec.dot_product(vec2) << std::endl;
+    std::cout << "\n" << std::endl;
+
+    std::cout << "cross product:" << std::endl;
+    std::cout << vec.cross_product(vec2) << std::endl;
 
     return 0;
 }
