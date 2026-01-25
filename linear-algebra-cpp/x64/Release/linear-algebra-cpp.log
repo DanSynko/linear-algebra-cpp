@@ -1,0 +1,8 @@
+﻿  linear-algebra-cpp.cpp
+C:\Users\Данило\source\repos\linear-algebra-cpp\linear-algebra-cpp\linear-algebra-cpp.cpp(13,24): warning C4244: return: преобразование "double" в "float", возможна потеря данных
+  Создание кода
+  62 of 1752 functions ( 3.5%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    42 functions had inline decision re-evaluated but remain unchanged
+  Создание кода завершено
+  linear-algebra-cpp.vcxproj -> C:\Users\Данило\source\repos\linear-algebra-cpp\x64\Release\linear-algebra-cpp.exe
