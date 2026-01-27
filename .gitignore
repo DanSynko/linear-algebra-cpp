@@ -1,5 +1,29 @@
-﻿################################################################################
-# Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
-################################################################################
+﻿/.vs/linear-algebra-cpp
 
-/.vs/linear-algebra-cpp
+# Result of build
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+
+# temporary files of compilaton
+*.obj
+*.pdb
+
+# Debug and binary files
+*.exe
+*.dll
+*.lib
+*.pdb
+*.exp
+*.ilk
+*.map
+*.log
+
+#IntelliSence
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+*.ipch
