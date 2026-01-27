@@ -18,23 +18,26 @@
     <ClCompile Include="linear-algebra-cpp.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\libs\imgui.cpp">
+    <ClCompile Include="..\third_party_libs\imgui_tables.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\libs\imgui_draw.cpp">
+    <ClCompile Include="..\third_party_libs\imgui_widgets.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\libs\rlImGui-main\rlImGui.cpp">
+    <ClCompile Include="..\third_party_libs\imgui_draw.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\libs\imgui_tables.cpp">
+    <ClCompile Include="..\third_party_libs\rlImGui-main\rlImGui.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\libs\imgui_widgets.cpp">
+    <ClCompile Include="..\third_party_libs\imgui.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\config.json" />
   </ItemGroup>
 </Project>

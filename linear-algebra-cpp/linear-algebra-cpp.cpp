@@ -1,7 +1,11 @@
 ﻿#include <cmath>
+#include <string>
 #include "raylib.h"
 #include "imgui.h"
 #include "rlImGui-main/rlImGui.h"
+#include "nlohmann/json.hpp"
+#include <fstream>
+using json = nlohmann::json;
 
 namespace mylinar {
 
@@ -40,14 +44,37 @@ namespace mylinar {
         }
     };
 };
+class App {
+private:
+    json settings_data;
+public:
+    App() {
+        std::ifstream config_file("config.json");
+        config_file >> settings_data;
+        config_file.close();
+    }
+    enum STATE {
+        START_SCREEN,
+        SETTINGS_SCREEN,
+        WORK_SCREEN,
+        EXIT
+    };
 
-enum STATE {
-    START_SCREEN,
-    WORK
+    void config_file_save(const auto& new_option) const {
+        std::ofstream save_config_file("config.json");
+        save_config_file << new_option;
+        save_config_file.close();
+    }
+    auto get_settings_data() {
+        return settings_data;
+    }
 };
+using STATE = App::STATE;
 
 int main()
 {
+    App app;
+
     mylinar::Vector3 vec = { 1, 5, 3 };
     mylinar::Vector3 vec2 = { 4, 2, 5 };
 
@@ -67,28 +94,75 @@ int main()
     camera.fovy = 45.0f;
     camera.projection = CAMERA_PERSPECTIVE;
 
-    STATE app_state = START_SCREEN;
+    json settings_data_now = app.get_settings_data();
+
+    bool exit_pressed = false;
+    STATE app_state = STATE::START_SCREEN;
     while (!WindowShouldClose()) {
 
+
         BeginDrawing();
-        ClearBackground(BLACK);
+        Color bgColor = (settings_data_now["Theme"] == "Dark") ? BLACK : WHITE;
+        Color textColor = (settings_data_now["Theme"] == "Dark") ? WHITE : BLACK;
+
+        ClearBackground(bgColor);
+        if (settings_data_now["Theme"] == "Dark") {
+            ImGui::StyleColorsDark();
+        }
+        else {
+            ImGui::StyleColorsLight();
+        }
         rlImGuiBegin();
 
         switch (app_state) {
-            case START_SCREEN:
+            case STATE::START_SCREEN:
                 ImGui::SetNextWindowPos({ (float)GetScreenWidth() / 2 - 100, (float)GetScreenHeight() / 2 - 50 });
-                ImGui::SetNextWindowSize({ 200, 100 });
+                ImGui::SetNextWindowSize({ 200, 200 });
 
+                DrawText("WELCOME TO LINEAR ALGEBRA VISUALISATOR!", 450, 200, 30, textColor);
                 ImGui::Begin("Main menu", nullptr, window_flags);
-                ImGui::Text("linear-algebra-visualizator");
 
-                if (ImGui::Button("Get Started", { 180, 40 })) {
-                    app_state = WORK;
+                if (ImGui::Button("Start", { 180, 40 })) {
+                    app_state = STATE::WORK_SCREEN;
+                }
+                if (ImGui::Button("Settings", { 180, 40 })) {
+                    app_state = STATE::SETTINGS_SCREEN;
+                }
+                if (ImGui::Button("Exit", { 180, 40 })) {
+                    app_state = STATE::EXIT;
                 }
                 ImGui::End();
+
+                DrawText("Author: DanSynko", 1400, 850, 20, textColor);
                 break;
 
-            case WORK:
+            case STATE::SETTINGS_SCREEN:
+                ImGui::SetNextWindowPos({ (float)GetScreenWidth() / 2 - 100, (float)GetScreenHeight() / 2 - 50 });
+                ImGui::SetNextWindowSize({ 200, 200 });
+
+
+                ImGui::Begin("Settings menu", nullptr, window_flags);
+
+                if (ImGui::Button("Dark/Light Theme", { 180, 40 })) {
+                    if (settings_data_now["Theme"] == "Light") {
+                        ImGui::StyleColorsDark();
+                        settings_data_now["Theme"] = "Dark";
+                        app.config_file_save(settings_data_now);
+                    }
+                    else if (settings_data_now["Theme"] == "Dark") {
+                        ImGui::StyleColorsLight();
+                        settings_data_now["Theme"] = "Light";
+                        app.config_file_save(settings_data_now);
+                    }
+                }
+                if (ImGui::Button("Back to menu", { 180, 40 })) {
+                    app_state = STATE::START_SCREEN;
+                }
+                ImGui::End();
+
+                break;
+
+            case STATE::WORK_SCREEN:
                 BeginMode3D(camera);
                 DrawGrid(10, 1.0f);
                 DrawLine3D({ 0,0,0 }, { vec.x, vec.y, vec.z }, RED);
@@ -119,7 +193,7 @@ int main()
                     ImGui::Separator();
 
                     if (ImGui::Button("Back to menu.")) {
-                        app_state = START_SCREEN;
+                        app_state = STATE::START_SCREEN;
                     }
 
                 ImGui::End();
@@ -127,10 +201,15 @@ int main()
                 DrawText("work_mode", 20, 20, 20, YELLOW);
 
                 break;
+            case STATE::EXIT:
+                exit_pressed = true;
+                break;
         }
 
         rlImGuiEnd();
         EndDrawing();
+
+        if (exit_pressed) break;
     }
 
     rlImGuiShutdown();
