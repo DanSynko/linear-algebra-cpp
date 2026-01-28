@@ -1,5 +1,5 @@
 ﻿#include <cmath>
-#include <string>
+#include <algorithm>
 #include "raylib.h"
 #include "imgui.h"
 #include "rlImGui-main/rlImGui.h"
@@ -88,20 +88,23 @@ int main()
     window_flags |= ImGuiWindowFlags_NoDecoration;
 
     Camera3D camera = { 0 };
-    camera.position = { 10.0f, 10.0f, 10.0f };
+    camera.position = { 20.0f, 15.0f, 0.0f };
     camera.target = { 0.0f, 0.0f, 0.0f };
     camera.up = { 0.0f, 1.0f, 0.0f };
     camera.fovy = 45.0f;
     camera.projection = CAMERA_PERSPECTIVE;
 
     json settings_data_now = app.get_settings_data();
+    bool debug_mode = true;
 
     bool exit_pressed = false;
     STATE app_state = STATE::START_SCREEN;
+    float radius = 15;
+    float last_mouse_wheel_move = 0.0f;
     while (!WindowShouldClose()) {
-
-
         BeginDrawing();
+
+        auto mouse_wheel_move = GetMouseWheelMove();
         Color bgColor = (settings_data_now["Theme"] == "Dark") ? BLACK : WHITE;
         Color textColor = (settings_data_now["Theme"] == "Dark") ? WHITE : BLACK;
 
@@ -140,7 +143,6 @@ int main()
                 ImGui::SetNextWindowPos({ (float)GetScreenWidth() / 2 - 100, (float)GetScreenHeight() / 2 - 50 });
                 ImGui::SetNextWindowSize({ 200, 200 });
 
-
                 ImGui::Begin("Settings menu", nullptr, window_flags);
 
                 if (ImGui::Button("Dark/Light Theme", { 180, 40 })) {
@@ -163,6 +165,32 @@ int main()
                 break;
 
             case STATE::WORK_SCREEN:
+                if (mouse_wheel_move != 0) {
+                    Vector3 direct_vec = { (camera.target.x - camera.position.x), (camera.target.y - camera.position.y), (camera.target.z - camera.position.z) };
+                    float length = sqrt((direct_vec.x * direct_vec.x) + (direct_vec.y * direct_vec.y) + (direct_vec.z * direct_vec.z));
+                    direct_vec.x /= length;
+                    direct_vec.y /= length;
+                    direct_vec.z /= length;
+                    last_mouse_wheel_move = mouse_wheel_move;
+                    radius -= mouse_wheel_move * 8.5;
+                    radius = std::clamp(radius, 0.0f, 200.0f);
+                    if (radius != 0 && radius != 200) {
+                        camera.position.x += direct_vec.x * (mouse_wheel_move * 8.5);
+                        camera.position.y += direct_vec.y * (mouse_wheel_move * 8.5);
+                        camera.position.z += direct_vec.z * (mouse_wheel_move * 8.5);
+                    }
+                }
+                
+                if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+                    static float horizontal_angle = 0.0;
+                    static float vertical_angle = 0.0;
+                    Vector2 delta = GetMouseDelta();
+                    horizontal_angle += delta.x * 0.01f;
+                    vertical_angle += delta.y * 0.01f;
+                    camera.position.x = radius * sin(vertical_angle) * cos(horizontal_angle);
+                    camera.position.y = radius * cos(vertical_angle);
+                    camera.position.z = radius * sin(vertical_angle) * sin(horizontal_angle);
+                }
                 BeginMode3D(camera);
                 DrawGrid(10, 1.0f);
                 DrawLine3D({ 0,0,0 }, { vec.x, vec.y, vec.z }, RED);
@@ -172,6 +200,8 @@ int main()
                 DrawLine3D({ 0,0,0 }, { cross_product_vec.x, cross_product_vec.y, cross_product_vec.z }, BLUE);
                 EndMode3D();
 
+                ImGui::SetNextWindowPos({ 10.0f, 10.0f });
+                ImGui::SetNextWindowSize({ 200, 250 });
                 ImGui::Begin("Tools", nullptr, window_flags);
 
                     ImGui::Text("Red Vector");
@@ -197,9 +227,23 @@ int main()
                     }
 
                 ImGui::End();
+                
+                ImGui::SetNextWindowPos({ 1450.0f, 10.0f });
+                ImGui::SetNextWindowSize({ 125, 25 });
+                ImGui::Begin("Debug mode", nullptr, window_flags);
+                    ImGui::Checkbox("Debug mode", &debug_mode);
+                ImGui::End();
+                if (debug_mode) {
+                    DrawText(TextFormat("mouse_wheel_move: %.2f", last_mouse_wheel_move), 500, 20, 20, YELLOW);
+                    DrawText(TextFormat("radius: %.2f", radius), 500, 40, 20, YELLOW);
+                    DrawText(TextFormat("camera_position_x: %.2f", camera.position.x), 500, 60, 20, YELLOW);
+                    DrawText(TextFormat("camera_position_y: %.2f", camera.position.y), 500, 80, 20, YELLOW);
+                    DrawText(TextFormat("camera_position_z: %.2f", camera.position.z), 500, 100, 20, YELLOW);
+                }
 
-                DrawText("work_mode", 20, 20, 20, YELLOW);
+                DrawText("work_mode", 300, 20, 20, YELLOW);
 
+                DrawText("Hold down RMB to look around the scene. Scroll the mouse wheel to zoom in/out.", 10, 880, 18, YELLOW);
                 break;
             case STATE::EXIT:
                 exit_pressed = true;
