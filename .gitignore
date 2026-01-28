@@ -27,3 +27,4 @@ build/
 *.VC.db
 *.VC.opendb
 *.ipch
+/linear-algebra-cpp/x64/Debug/linear-algebra-cpp.log
