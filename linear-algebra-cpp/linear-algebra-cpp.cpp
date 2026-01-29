@@ -95,6 +95,8 @@ int main()
     camera.projection = CAMERA_PERSPECTIVE;
 
     json settings_data_now = app.get_settings_data();
+    float mouse_sensitivity = settings_data_now["Mouse_sensitivity"];
+    float mouse_wheel_sensitivity = settings_data_now["Mouse_wheel_sensitivity"];
     bool debug_mode = true;
 
     bool exit_pressed = false;
@@ -142,8 +144,8 @@ int main()
                 break;
 
             case STATE::SETTINGS_SCREEN:
-                ImGui::SetNextWindowPos({ (float)GetScreenWidth() / 2 - 100, (float)GetScreenHeight() / 2 - 50 });
-                ImGui::SetNextWindowSize({ 200, 200 });
+                ImGui::SetNextWindowPos({ (float)GetScreenWidth() / 2 - 150, (float)GetScreenHeight() / 2 - 50 });
+                ImGui::SetNextWindowSize({ 500, 200 });
 
                 ImGui::Begin("Settings menu", nullptr, window_flags);
 
@@ -158,6 +160,14 @@ int main()
                         settings_data_now["Theme"] = "Light";
                         app.config_file_save(settings_data_now);
                     }
+                }
+                if (ImGui::SliderFloat("Mouse sensitivity", &mouse_sensitivity, 0.001f, 0.1f)) {
+                    settings_data_now["Mouse_sensitivity"] = mouse_sensitivity;
+                    app.config_file_save(settings_data_now);
+                }
+                if (ImGui::SliderFloat("Mouse wheel sensitivity", &mouse_wheel_sensitivity, 1.0f, 20.0f)) {
+                    settings_data_now["Mouse_wheel_sensitivity"] = mouse_wheel_sensitivity;
+                    app.config_file_save(settings_data_now);
                 }
                 if (ImGui::Button("Back to menu", { 180, 40 })) {
                     app_state = STATE::START_SCREEN;
@@ -174,18 +184,18 @@ int main()
                     direct_vec.x /= length;
                     direct_vec.y /= length;
                     direct_vec.z /= length;
-                    radius -= mouse_wheel_move * 8.5;
+                    radius -= mouse_wheel_move * mouse_wheel_sensitivity;
                     radius = std::clamp(radius, 0.1f, 100.0f);
                     if (radius != 100) {
-                        camera.position.x += direct_vec.x * (mouse_wheel_move * 8.5);
-                        camera.position.y += direct_vec.y * (mouse_wheel_move * 8.5);
-                        camera.position.z += direct_vec.z * (mouse_wheel_move * 8.5);
+                        camera.position.x += direct_vec.x * (mouse_wheel_move * mouse_wheel_sensitivity);
+                        camera.position.y += direct_vec.y * (mouse_wheel_move * mouse_wheel_sensitivity);
+                        camera.position.z += direct_vec.z * (mouse_wheel_move * mouse_wheel_sensitivity);
                     }
                 }
                 if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
                     Vector2 delta = GetMouseDelta();
-                    horizontal_angle += delta.x * 0.01f;
-                    vertical_angle += delta.y * 0.01f;
+                    horizontal_angle += delta.x * mouse_sensitivity;
+                    vertical_angle += delta.y * mouse_sensitivity;
                     if (horizontal_angle != 0.0f && vertical_angle != 0.0f) {
                         camera.position.x = radius * sin(vertical_angle) * cos(horizontal_angle);
                         camera.position.y = radius * cos(vertical_angle);
