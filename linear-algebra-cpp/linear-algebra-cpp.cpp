@@ -56,6 +56,7 @@ public:
     enum STATE {
         START_SCREEN,
         SETTINGS_SCREEN,
+        ABOUT_SCREEN,
         WORK_SCREEN,
         EXIT
     };
@@ -124,7 +125,7 @@ int main()
         switch (app_state) {
             case STATE::START_SCREEN:
                 ImGui::SetNextWindowPos({ (float)GetScreenWidth() / 2 - 100, (float)GetScreenHeight() / 2 - 50 });
-                ImGui::SetNextWindowSize({ 200, 200 });
+                ImGui::SetNextWindowSize({ 200, 190 });
 
                 DrawText("WELCOME TO LINEAR ALGEBRA VISUALISATOR!", 450, 200, 30, textColor);
                 ImGui::Begin("Main menu", nullptr, window_flags);
@@ -135,12 +136,13 @@ int main()
                 if (ImGui::Button("Settings", { 180, 40 })) {
                     app_state = STATE::SETTINGS_SCREEN;
                 }
+                if (ImGui::Button("About", { 180, 40 })) {
+                    app_state = STATE::ABOUT_SCREEN;
+                }
                 if (ImGui::Button("Exit", { 180, 40 })) {
                     app_state = STATE::EXIT;
                 }
                 ImGui::End();
-
-                DrawText("Author: DanSynko", 1400, 850, 20, textColor);
                 break;
 
             case STATE::SETTINGS_SCREEN:
@@ -175,7 +177,17 @@ int main()
                 ImGui::End();
 
                 break;
-
+            case STATE::ABOUT_SCREEN:
+                DrawText("Start of development: januar 2026", (float)GetScreenWidth() / 2 - 150, (float)GetScreenHeight() / 2 - 100, 20, textColor);
+                DrawText("Author: DanSynko", (float)GetScreenWidth() / 2 - 150, (float)GetScreenHeight() / 2 - 150, 20, textColor);
+                ImGui::Begin("Settings menu", nullptr, window_flags);
+                ImGui::SetNextWindowPos({ 350, 350 });
+                ImGui::SetNextWindowSize({ 91, 31 });
+                    if (ImGui::Button("Back to menu", { 90, 30 })) {
+                        app_state = STATE::START_SCREEN;
+                    }
+                ImGui::End();
+                break;
             case STATE::WORK_SCREEN:
                 if (mouse_wheel_move != 0) {
                     last_mouse_wheel_move = mouse_wheel_move;
