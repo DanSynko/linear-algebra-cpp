@@ -33,6 +33,9 @@
     <ClCompile Include="..\third_party_libs\imgui.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="..\MathEngine.cppm">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

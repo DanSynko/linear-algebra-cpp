@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\MathEngine.cppm" />
     <ClCompile Include="..\third_party_libs\imgui.cpp" />
     <ClCompile Include="..\third_party_libs\imgui_draw.cpp" />
     <ClCompile Include="..\third_party_libs\imgui_tables.cpp" />

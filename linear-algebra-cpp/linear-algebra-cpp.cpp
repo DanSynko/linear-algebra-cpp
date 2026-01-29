@@ -1,4 +1,4 @@
-﻿#include <cmath>
+﻿import MathEngine;
 #include <algorithm>
 #include "raylib.h"
 #include "imgui.h"
@@ -7,52 +7,22 @@
 #include <fstream>
 using json = nlohmann::json;
 
-namespace mylinar {
-
-    struct Vector3 {
-        using component = float;
-        component x, y, z;
-
-        float get_length() const {
-            return sqrt((x * x) + (y * y) + (z * z));
-        }
-
-
-        const Vector3 operator+(const Vector3& vec) const {
-            return Vector3(this->x + vec.x, this->y + vec.y, this->z + vec.z);
-        }
-        const Vector3 operator-(const Vector3& vec) const {
-            return Vector3(this->x - vec.x, this->y - vec.y, this->z - vec.z);
-        }
-
-
-        float dot_product(const Vector3& other_vec) const {
-            return (this->x * other_vec.x) + (this->y * other_vec.y) + (this->z * other_vec.z);
-        }
-        Vector3 cross_product(const Vector3& vec) {
-            return Vector3(
-                this->y * vec.z - this->z * vec.y,
-                this->z * vec.x - this->x * vec.z,
-                this->x * vec.y - this->y * vec.x
-            );
-        }
-        void normalize() {
-            float length = get_length();
-            x /= length;
-            y /= length;
-            z /= length;
-        }
-    };
-};
-class App {
-private:
+struct App {
+    STATE app_state = START_SCREEN;
+    bool debug_mode = true;
+    bool exit_pressed = false;
     json settings_data;
-public:
+
+
     App() {
         std::ifstream config_file("config.json");
         config_file >> settings_data;
         config_file.close();
     }
+
+
+
+
     enum STATE {
         START_SCREEN,
         SETTINGS_SCREEN,
@@ -61,13 +31,13 @@ public:
         EXIT
     };
 
+
+
+
     void config_file_save(const auto& new_option) const {
         std::ofstream save_config_file("config.json");
         save_config_file << new_option;
         save_config_file.close();
-    }
-    auto get_settings_data() {
-        return settings_data;
     }
 };
 using STATE = App::STATE;
@@ -76,9 +46,13 @@ int main()
 {
     App app;
 
-    mylinar::Vector3 vec = { 1, 5, 3 };
-    mylinar::Vector3 vec2 = { 4, 2, 5 };
+    MathEngine::Vector3 vec = { 1, 5, 3 };
+    MathEngine::Vector3 vec2 = { 4, 2, 5 };
 
+
+
+
+    // WINDOW AND UI SETTING
     InitWindow(1600, 900, "linear-algebra-visualisator");
     SetTargetFPS(60);
     rlImGuiSetup(true);
@@ -88,6 +62,10 @@ int main()
     window_flags |= ImGuiWindowFlags_NoCollapse;
     window_flags |= ImGuiWindowFlags_NoDecoration;
 
+
+
+
+    // CAMERA SETTING
     Camera3D camera = { 0 };
     camera.position = { 20.0f, 15.0f, 5.0f };
     camera.target = { 0.0f, 0.0f, 0.0f };
@@ -95,53 +73,69 @@ int main()
     camera.fovy = 45.0f;
     camera.projection = CAMERA_PERSPECTIVE;
 
-    json settings_data_now = app.get_settings_data();
-    float mouse_sensitivity = settings_data_now["Mouse_sensitivity"];
-    float mouse_wheel_sensitivity = settings_data_now["Mouse_wheel_sensitivity"];
-    bool debug_mode = true;
 
-    bool exit_pressed = false;
-    STATE app_state = STATE::START_SCREEN;
+
+
+    // SETTINGS FROM CONFIG.JSON
+    float mouse_sensitivity = app.settings_data["Mouse_sensitivity"];
+    float mouse_wheel_sensitivity = app.settings_data["Mouse_wheel_sensitivity"];
+
+
+
+    // FOR DEBUG MODE
     float radius = 15;
     float last_mouse_wheel_move = 0.0f;
     float horizontal_angle = 0.0;
     float vertical_angle = 0.0;
+
+
+
     while (!WindowShouldClose()) {
         BeginDrawing();
 
-        auto mouse_wheel_move = GetMouseWheelMove();
-        Color bgColor = (settings_data_now["Theme"] == "Dark") ? BLACK : WHITE;
-        Color textColor = (settings_data_now["Theme"] == "Dark") ? WHITE : BLACK;
 
+
+        // REAL-TIME VARIABLES
+        auto mouse_wheel_move = GetMouseWheelMove();
+        Color bgColor = (app.settings_data["Theme"] == "Dark") ? BLACK : WHITE;
+        Color textColor = (app.settings_data["Theme"] == "Dark") ? WHITE : BLACK;
+
+
+
+
+        // THEME SETTING
         ClearBackground(bgColor);
-        if (settings_data_now["Theme"] == "Dark") {
+        if (app.settings_data["Theme"] == "Dark") {
             ImGui::StyleColorsDark();
         }
         else {
             ImGui::StyleColorsLight();
         }
+
+
+
+
         rlImGuiBegin();
 
-        switch (app_state) {
+        switch (app.app_state) {
             case STATE::START_SCREEN:
                 ImGui::SetNextWindowPos({ (float)GetScreenWidth() / 2 - 100, (float)GetScreenHeight() / 2 - 50 });
                 ImGui::SetNextWindowSize({ 200, 190 });
 
                 DrawText("WELCOME TO LINEAR ALGEBRA VISUALISATOR!", 450, 200, 30, textColor);
                 ImGui::Begin("Main menu", nullptr, window_flags);
-
-                if (ImGui::Button("Start", { 180, 40 })) {
-                    app_state = STATE::WORK_SCREEN;
-                }
-                if (ImGui::Button("Settings", { 180, 40 })) {
-                    app_state = STATE::SETTINGS_SCREEN;
-                }
-                if (ImGui::Button("About", { 180, 40 })) {
-                    app_state = STATE::ABOUT_SCREEN;
-                }
-                if (ImGui::Button("Exit", { 180, 40 })) {
-                    app_state = STATE::EXIT;
-                }
+                    if (ImGui::Button("Start", { 180, 40 })) {
+                        app.app_state = STATE::WORK_SCREEN;
+                    }
+                    if (ImGui::Button("Settings", { 180, 40 })) {
+                        app.app_state = STATE::SETTINGS_SCREEN;
+                    }
+                    if (ImGui::Button("About", { 180, 40 })) {
+                        app.app_state = STATE::ABOUT_SCREEN;
+                    }
+                    if (ImGui::Button("Exit", { 180, 40 })) {
+                        app.app_state = STATE::EXIT;
+                    }
                 ImGui::End();
                 break;
 
@@ -150,30 +144,29 @@ int main()
                 ImGui::SetNextWindowSize({ 500, 200 });
 
                 ImGui::Begin("Settings menu", nullptr, window_flags);
-
-                if (ImGui::Button("Dark/Light Theme", { 180, 40 })) {
-                    if (settings_data_now["Theme"] == "Light") {
-                        ImGui::StyleColorsDark();
-                        settings_data_now["Theme"] = "Dark";
-                        app.config_file_save(settings_data_now);
+                    if (ImGui::Button("Dark/Light Theme", { 180, 40 })) {
+                        if (app.settings_data["Theme"] == "Light") {
+                            ImGui::StyleColorsDark();
+                            app.settings_data["Theme"] = "Dark";
+                            app.config_file_save(app.settings_data);
+                        }
+                        else if (app.settings_data["Theme"] == "Dark") {
+                            ImGui::StyleColorsLight();
+                            app.settings_data["Theme"] = "Light";
+                            app.config_file_save(app.settings_data);
+                        }
                     }
-                    else if (settings_data_now["Theme"] == "Dark") {
-                        ImGui::StyleColorsLight();
-                        settings_data_now["Theme"] = "Light";
-                        app.config_file_save(settings_data_now);
+                    if (ImGui::SliderFloat("Mouse sensitivity", &mouse_sensitivity, 0.001f, 0.1f)) {
+                        app.settings_data["Mouse_sensitivity"] = mouse_sensitivity;
+                        app.config_file_save(app.settings_data);
                     }
-                }
-                if (ImGui::SliderFloat("Mouse sensitivity", &mouse_sensitivity, 0.001f, 0.1f)) {
-                    settings_data_now["Mouse_sensitivity"] = mouse_sensitivity;
-                    app.config_file_save(settings_data_now);
-                }
-                if (ImGui::SliderFloat("Mouse wheel sensitivity", &mouse_wheel_sensitivity, 1.0f, 20.0f)) {
-                    settings_data_now["Mouse_wheel_sensitivity"] = mouse_wheel_sensitivity;
-                    app.config_file_save(settings_data_now);
-                }
-                if (ImGui::Button("Back to menu", { 180, 40 })) {
-                    app_state = STATE::START_SCREEN;
-                }
+                    if (ImGui::SliderFloat("Mouse wheel sensitivity", &mouse_wheel_sensitivity, 1.0f, 20.0f)) {
+                        app.settings_data["Mouse_wheel_sensitivity"] = mouse_wheel_sensitivity;
+                        app.config_file_save(app.settings_data);
+                    }
+                    if (ImGui::Button("Back to menu", { 180, 40 })) {
+                        app.settings_data = STATE::START_SCREEN;
+                    }
                 ImGui::End();
 
                 break;
@@ -184,7 +177,7 @@ int main()
                 ImGui::SetNextWindowPos({ 350, 350 });
                 ImGui::SetNextWindowSize({ 91, 31 });
                     if (ImGui::Button("Back to menu", { 90, 30 })) {
-                        app_state = STATE::START_SCREEN;
+                        app.app_state = STATE::START_SCREEN;
                     }
                 ImGui::End();
                 break;
@@ -215,18 +208,17 @@ int main()
                     }
                 }
                 BeginMode3D(camera);
-                DrawGrid(10, 1.0f);
-                DrawLine3D({ 0,0,0 }, { vec.x, vec.y, vec.z }, RED);
-                DrawLine3D({ 0,0,0 }, { vec2.x, vec2.y, vec2.z }, GREEN);
+                    DrawGrid(10, 1.0f);
+                    DrawLine3D({ 0,0,0 }, { vec.x, vec.y, vec.z }, RED);
+                    DrawLine3D({ 0,0,0 }, { vec2.x, vec2.y, vec2.z }, GREEN);
 
-                mylinar::Vector3 cross_product_vec = vec.cross_product(vec2);
-                DrawLine3D({ 0,0,0 }, { cross_product_vec.x, cross_product_vec.y, cross_product_vec.z }, BLUE);
+                    MathEngine::Vector3 cross_product_vec = vec.cross_product(vec2);
+                    DrawLine3D({ 0,0,0 }, { cross_product_vec.x, cross_product_vec.y, cross_product_vec.z }, BLUE);
                 EndMode3D();
 
                 ImGui::SetNextWindowPos({ 10.0f, 10.0f });
                 ImGui::SetNextWindowSize({ 200, 250 });
                 ImGui::Begin("Tools", nullptr, window_flags);
-
                     ImGui::Text("Red Vector");
                     ImGui::PushID("RedVector");
                         ImGui::SliderFloat("X", &vec.x, -10, 10);
@@ -246,17 +238,16 @@ int main()
                     ImGui::Separator();
 
                     if (ImGui::Button("Back to menu.")) {
-                        app_state = STATE::START_SCREEN;
+                        app.app_state = STATE::START_SCREEN;
                     }
-
                 ImGui::End();
                 
                 ImGui::SetNextWindowPos({ 1450.0f, 10.0f });
                 ImGui::SetNextWindowSize({ 125, 25 });
                 ImGui::Begin("Debug mode", nullptr, window_flags);
-                    ImGui::Checkbox("Debug mode", &debug_mode);
+                    ImGui::Checkbox("Debug mode", &app.debug_mode);
                 ImGui::End();
-                if (debug_mode) {
+                if (app.debug_mode) {
                     DrawText(TextFormat("mouse_delta_x: %.2f", GetMouseDelta().x), 500, 20, 20, YELLOW);
                     DrawText(TextFormat("mouse_delta_y: %.2f", GetMouseDelta().y), 500, 40, 20, YELLOW);
                     DrawText(TextFormat("horizontal_angle(pfi): %.2f", horizontal_angle), 500, 60, 20, YELLOW);
@@ -267,20 +258,18 @@ int main()
                     DrawText(TextFormat("camera_position_y: %.2f", camera.position.y), 500, 160, 20, YELLOW);
                     DrawText(TextFormat("camera_position_z: %.2f", camera.position.z), 500, 180, 20, YELLOW);
                 }
-
                 DrawText("work_mode", 300, 20, 20, YELLOW);
-
                 DrawText("Hold down RMB to look around the scene. Scroll the mouse wheel to zoom in/out.", 10, 880, 18, YELLOW);
                 break;
             case STATE::EXIT:
-                exit_pressed = true;
+                app.exit_pressed = true;
                 break;
         }
 
         rlImGuiEnd();
         EndDrawing();
 
-        if (exit_pressed) break;
+        if (app.exit_pressed) break;
     }
 
     rlImGuiShutdown();
