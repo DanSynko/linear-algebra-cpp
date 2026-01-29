@@ -88,7 +88,7 @@ int main()
     window_flags |= ImGuiWindowFlags_NoDecoration;
 
     Camera3D camera = { 0 };
-    camera.position = { 20.0f, 15.0f, 0.0f };
+    camera.position = { 20.0f, 15.0f, 5.0f };
     camera.target = { 0.0f, 0.0f, 0.0f };
     camera.up = { 0.0f, 1.0f, 0.0f };
     camera.fovy = 45.0f;
@@ -101,6 +101,8 @@ int main()
     STATE app_state = STATE::START_SCREEN;
     float radius = 15;
     float last_mouse_wheel_move = 0.0f;
+    float horizontal_angle = 0.0;
+    float vertical_angle = 0.0;
     while (!WindowShouldClose()) {
         BeginDrawing();
 
@@ -166,30 +168,29 @@ int main()
 
             case STATE::WORK_SCREEN:
                 if (mouse_wheel_move != 0) {
+                    last_mouse_wheel_move = mouse_wheel_move;
                     Vector3 direct_vec = { (camera.target.x - camera.position.x), (camera.target.y - camera.position.y), (camera.target.z - camera.position.z) };
                     float length = sqrt((direct_vec.x * direct_vec.x) + (direct_vec.y * direct_vec.y) + (direct_vec.z * direct_vec.z));
                     direct_vec.x /= length;
                     direct_vec.y /= length;
                     direct_vec.z /= length;
-                    last_mouse_wheel_move = mouse_wheel_move;
                     radius -= mouse_wheel_move * 8.5;
-                    radius = std::clamp(radius, 0.0f, 200.0f);
-                    if (radius != 0 && radius != 200) {
+                    radius = std::clamp(radius, 0.1f, 100.0f);
+                    if (radius != 100) {
                         camera.position.x += direct_vec.x * (mouse_wheel_move * 8.5);
                         camera.position.y += direct_vec.y * (mouse_wheel_move * 8.5);
                         camera.position.z += direct_vec.z * (mouse_wheel_move * 8.5);
                     }
                 }
-                
                 if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-                    static float horizontal_angle = 0.0;
-                    static float vertical_angle = 0.0;
                     Vector2 delta = GetMouseDelta();
                     horizontal_angle += delta.x * 0.01f;
                     vertical_angle += delta.y * 0.01f;
-                    camera.position.x = radius * sin(vertical_angle) * cos(horizontal_angle);
-                    camera.position.y = radius * cos(vertical_angle);
-                    camera.position.z = radius * sin(vertical_angle) * sin(horizontal_angle);
+                    if (horizontal_angle != 0.0f && vertical_angle != 0.0f) {
+                        camera.position.x = radius * sin(vertical_angle) * cos(horizontal_angle);
+                        camera.position.y = radius * cos(vertical_angle);
+                        camera.position.z = radius * sin(vertical_angle) * sin(horizontal_angle);
+                    }
                 }
                 BeginMode3D(camera);
                 DrawGrid(10, 1.0f);
@@ -234,11 +235,15 @@ int main()
                     ImGui::Checkbox("Debug mode", &debug_mode);
                 ImGui::End();
                 if (debug_mode) {
-                    DrawText(TextFormat("mouse_wheel_move: %.2f", last_mouse_wheel_move), 500, 20, 20, YELLOW);
-                    DrawText(TextFormat("radius: %.2f", radius), 500, 40, 20, YELLOW);
-                    DrawText(TextFormat("camera_position_x: %.2f", camera.position.x), 500, 60, 20, YELLOW);
-                    DrawText(TextFormat("camera_position_y: %.2f", camera.position.y), 500, 80, 20, YELLOW);
-                    DrawText(TextFormat("camera_position_z: %.2f", camera.position.z), 500, 100, 20, YELLOW);
+                    DrawText(TextFormat("mouse_delta_x: %.2f", GetMouseDelta().x), 500, 20, 20, YELLOW);
+                    DrawText(TextFormat("mouse_delta_y: %.2f", GetMouseDelta().y), 500, 40, 20, YELLOW);
+                    DrawText(TextFormat("horizontal_angle(pfi): %.2f", horizontal_angle), 500, 60, 20, YELLOW);
+                    DrawText(TextFormat("vertical_angle(theta): %.2f", vertical_angle), 500, 80, 20, YELLOW);
+                    DrawText(TextFormat("mouse_wheel_move: %.2f", last_mouse_wheel_move), 500, 100, 20, YELLOW);
+                    DrawText(TextFormat("radius: %.2f", radius), 500, 120, 20, YELLOW);
+                    DrawText(TextFormat("camera_position_x: %.2f", camera.position.x), 500, 140, 20, YELLOW);
+                    DrawText(TextFormat("camera_position_y: %.2f", camera.position.y), 500, 160, 20, YELLOW);
+                    DrawText(TextFormat("camera_position_z: %.2f", camera.position.z), 500, 180, 20, YELLOW);
                 }
 
                 DrawText("work_mode", 300, 20, 20, YELLOW);

@@ -21,6 +21,7 @@ build/
 *.map
 *.log
 /linear-algebra-cpp/x64/Debug/linear-algebra-cpp.log
+/linear-algebra-cpp/x64/Debug/linear-algebra-cpp.Build.CppClean.log
 
 #IntelliSence
 *.sdf
@@ -28,4 +29,3 @@ build/
 *.VC.db
 *.VC.opendb
 *.ipch
-/linear-algebra-cpp/x64/Debug/linear-algebra-cpp.Build.CppClean.log
