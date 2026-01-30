@@ -1,4 +1,4 @@
-﻿/.vs/linear-algebra-cpp
+﻿.vs/
 
 # Result of build
 [Dd]ebug/
@@ -29,3 +29,17 @@ build/
 *.VC.db
 *.VC.opendb
 *.ipch
+
+#Visual Studio files
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+#CMake files
+out/
+build/
+CMakeCache.txt
+CMakeFiles/
+/linear-algebra-cpp/linear-algebra-cpp.vcxproj
+/linear-algebra-cpp/linear-algebra-cpp.vcxproj.filters
