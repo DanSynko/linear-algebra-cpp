@@ -8,19 +8,12 @@
 using json = nlohmann::json;
 
 struct App {
-    STATE app_state = START_SCREEN;
-    bool debug_mode = true;
-    bool exit_pressed = false;
-    json settings_data;
-
 
     App() {
         std::ifstream config_file("config.json");
         config_file >> settings_data;
         config_file.close();
     }
-
-
 
 
     enum STATE {
@@ -30,6 +23,13 @@ struct App {
         WORK_SCREEN,
         EXIT
     };
+
+
+
+    STATE app_state = START_SCREEN;
+    bool debug_mode = true;
+    bool exit_pressed = false;
+    json settings_data;
 
 
 
@@ -142,7 +142,6 @@ int main()
             case STATE::SETTINGS_SCREEN:
                 ImGui::SetNextWindowPos({ (float)GetScreenWidth() / 2 - 150, (float)GetScreenHeight() / 2 - 50 });
                 ImGui::SetNextWindowSize({ 500, 200 });
-
                 ImGui::Begin("Settings menu", nullptr, window_flags);
                     if (ImGui::Button("Dark/Light Theme", { 180, 40 })) {
                         if (app.settings_data["Theme"] == "Light") {
@@ -165,10 +164,9 @@ int main()
                         app.config_file_save(app.settings_data);
                     }
                     if (ImGui::Button("Back to menu", { 180, 40 })) {
-                        app.settings_data = STATE::START_SCREEN;
+                        app.app_state = STATE::START_SCREEN;
                     }
                 ImGui::End();
-
                 break;
             case STATE::ABOUT_SCREEN:
                 DrawText("Start of development: januar 2026", (float)GetScreenWidth() / 2 - 150, (float)GetScreenHeight() / 2 - 100, 20, textColor);

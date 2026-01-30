@@ -1,5 +1,9 @@
+module;
+#include <cmath>;
+
+
 export module MathEngine;
-import <cmath>;
+
 
 export namespace MathEngine {
 
@@ -8,7 +12,7 @@ export namespace MathEngine {
         component x, y, z;
 
         float get_length() const {
-            return sqrt((x * x) + (y * y) + (z * z));
+            return std::sqrt((x * x) + (y * y) + (z * z));
         }
 
 

@@ -15,7 +15,6 @@ build/
 *.exe
 *.dll
 *.lib
-*.pdb
 *.exp
 *.ilk
 *.map
@@ -30,7 +29,7 @@ build/
 *.VC.opendb
 *.ipch
 
-#Visual Studio files
+#Visual Studio project files
 *.sln
 *.vcxproj
 *.vcxproj.filters
